@@ -10,6 +10,18 @@ const DEFAULT_SETTINGS: Settings = {
         IDR: 15500,
     },
     theme: 'system',
+    categories: [
+        'Food & Dining',
+        'Shopping',
+        'Housing',
+        'Transportation',
+        'Utilities',
+        'Healthcare',
+        'Entertainment',
+        'Salary',
+        'Investment',
+        'Other',
+    ],
 };
 
 export const useStore = create<AppState>()(

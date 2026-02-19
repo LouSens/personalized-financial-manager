@@ -9,21 +9,8 @@ interface TransactionFormProps {
     defaultDate?: string;
 }
 
-const CATEGORIES = [
-    'Food & Dining',
-    'Shopping',
-    'Housing',
-    'Transportation',
-    'Utilities',
-    'Healthcare',
-    'Entertainment',
-    'Salary',
-    'Investment',
-    'Other',
-];
-
 const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, initialData, defaultDate }) => {
-    const { addTransaction, updateTransaction, accounts } = useStore();
+    const { addTransaction, updateTransaction, accounts, settings } = useStore();
     const [formData, setFormData] = useState<Omit<Transaction, 'id'>>({
         date: defaultDate || new Date().toISOString().split('T')[0],
         amount: 0,
@@ -190,7 +177,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, initialData,
                             placeholder="Select or type..."
                         />
                         <datalist id="categories">
-                            {CATEGORIES.map((cat) => (
+                            {settings.categories.map((cat) => (
                                 <option key={cat} value={cat} />
                             ))}
                         </datalist>

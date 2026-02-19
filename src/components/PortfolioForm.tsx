@@ -20,6 +20,8 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
         currency: settings.baseCurrency,
     });
 
+    const [unitCost, setUnitCost] = useState(0);
+
     useEffect(() => {
         if (initialData) {
             setFormData({
@@ -30,8 +32,26 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                 currentPrice: initialData.currentPrice,
                 currency: initialData.currency || settings.baseCurrency,
             });
+            setUnitCost(initialData.quantity > 0 ? initialData.costBasis / initialData.quantity : 0);
         }
     }, [initialData, settings.baseCurrency]);
+
+    const handleQuantityChange = (val: number) => {
+        setFormData(prev => ({
+            ...prev,
+            quantity: val,
+            costBasis: val * unitCost
+        }));
+    };
+
+    const handleUnitCostChange = (val: number) => {
+        setUnitCost(val);
+        setFormData(prev => ({
+            ...prev,
+            costBasis: prev.quantity * val
+        }));
+    };
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,22 +107,22 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                         step="0.0001"
                         required
                         value={formData.quantity}
-                        onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => handleQuantityChange(parseFloat(e.target.value) || 0)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Amount Invested
+                        Average Buy Price
                     </label>
                     <input
                         type="number"
                         step="0.01"
                         required
-                        value={formData.costBasis}
-                        onChange={(e) => setFormData({ ...formData, costBasis: parseFloat(e.target.value) || 0 })}
+                        value={unitCost}
+                        onChange={(e) => handleUnitCostChange(parseFloat(e.target.value) || 0)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="Total cash put in"
+                        placeholder="Price paid per unit"
                     />
                 </div>
                 <div>
@@ -141,8 +161,8 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
 
             <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex justify-between mb-1">
-                    <span>Avg Cost:</span>
-                    <span>{formatCurrency((formData.costBasis / (formData.quantity || 1)), formData.currency)} / unit</span>
+                    <span>Total Invested:</span>
+                    <span>{formatCurrency(formData.costBasis, formData.currency)}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                     <span>Market Value:</span>

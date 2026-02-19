@@ -53,7 +53,11 @@ const Dashboard: React.FC = () => {
     };
 
     const currentCashBalance = calculateCurrentCashBalance();
-    const currentPortfolioValue = portfolio.reduce((acc, item) => acc + (item.quantity * item.currentPrice), 0); // Assuming base currency for portfolio
+    const currentPortfolioValue = portfolio.reduce((acc, item) => {
+        const itemValue = item.quantity * item.currentPrice;
+        // Convert to base currency from item's currency
+        return acc + convertCurrency(itemValue, item.currency || settings.baseCurrency, settings.baseCurrency, settings.exchangeRates);
+    }, 0);
     const currentNetWorth = currentCashBalance + currentPortfolioValue;
 
     // --- 2. Net Worth History (Last 6 Months) ---
@@ -141,6 +145,26 @@ const Dashboard: React.FC = () => {
 
         return Array.from(typeMap.entries()).map(([name, value]) => ({ name, value }));
     }, [accounts, transactions, currentPortfolioValue, settings]);
+
+    // --- 4. Expense Allocation by Category ---
+    const categoryAllocationData = useMemo(() => {
+        const categoryMap = new Map<string, number>();
+
+        transactions.filter(t => t.type === 'Expense').forEach(t => {
+            const account = accounts.find(a => a.id === t.accountId);
+            if (!account) return;
+            const rate = settings.exchangeRates[account.currency] || 1;
+            const baseRate = settings.exchangeRates[settings.baseCurrency] || 1;
+            const amountInBase = (t.amount / rate) * baseRate;
+
+            const category = t.category || 'Uncategorized';
+            categoryMap.set(category, (categoryMap.get(category) || 0) + amountInBase);
+        });
+
+        return Array.from(categoryMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value); // Sort by highest expense
+    }, [transactions, accounts, settings]);
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -272,32 +296,61 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Asset Allocation */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Asset Allocation</h3>
-                <div className="h-64 flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RechartsPieChart>
-                            <Pie
-                                data={allocationData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {allocationData.map((_entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip formatter={(value: any) => formatCurrency(value, settings.baseCurrency)} />
-                            <Legend />
-                        </RechartsPieChart>
-                    </ResponsiveContainer>
+            {/* Allocations Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Asset Allocation */}
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Asset Allocation</h3>
+                    <div className="h-64 flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RechartsPieChart>
+                                <Pie
+                                    data={allocationData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {allocationData.map((_entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value: any) => formatCurrency(value, settings.baseCurrency)} />
+                                <Legend />
+                            </RechartsPieChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-            </div>
 
+                {/* Expense Allocation by Category */}
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-2 lg:col-span-1">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Expenses by Category</h3>
+                    <div className="h-64 flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RechartsPieChart>
+                                <Pie
+                                    data={categoryAllocationData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {categoryAllocationData.map((_entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value: any) => formatCurrency(value, settings.baseCurrency)} />
+                                <Legend />
+                            </RechartsPieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 };

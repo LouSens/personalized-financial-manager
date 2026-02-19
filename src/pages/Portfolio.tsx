@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, TrendingUp, TrendingDown, Edit2, Trash2, PieChart } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import type { PortfolioItem } from '../types';
-import { formatCurrency } from '../utils/currency';
+import { formatCurrency, convertCurrency } from '../utils/currency';
 import Modal from '../components/ui/Modal';
 import PortfolioForm from '../components/PortfolioForm';
 
@@ -11,8 +11,15 @@ const Portfolio: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<PortfolioItem | undefined>(undefined);
 
-    const totalCost = portfolio.reduce((acc, item) => acc + item.costBasis, 0);
-    const totalValue = portfolio.reduce((acc, item) => acc + (item.quantity * item.currentPrice), 0);
+    const totalCost = portfolio.reduce((acc, item) => {
+        return acc + convertCurrency(item.costBasis, item.currency || settings.baseCurrency, settings.baseCurrency, settings.exchangeRates);
+    }, 0);
+
+    const totalValue = portfolio.reduce((acc, item) => {
+        const itemMarketValue = item.quantity * item.currentPrice;
+        return acc + convertCurrency(itemMarketValue, item.currency || settings.baseCurrency, settings.baseCurrency, settings.exchangeRates);
+    }, 0);
+
     const totalGainLoss = totalValue - totalCost;
     const totalGainLossPercent = totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
 
@@ -93,14 +100,14 @@ const Portfolio: React.FC = () => {
                                             <div className="text-xs text-gray-500 dark:text-gray-400">{item.name}</div>
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell text-gray-600 dark:text-gray-300">
-                                            {formatCurrency(item.currentPrice, settings.baseCurrency)}
+                                            {formatCurrency(item.currentPrice, item.currency || settings.baseCurrency)}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-semibold text-gray-900 dark:text-white">{formatCurrency(marketValue, settings.baseCurrency)}</div>
+                                            <div className="font-semibold text-gray-900 dark:text-white">{formatCurrency(marketValue, item.currency || settings.baseCurrency)}</div>
                                             <div className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} units</div>
                                         </td>
                                         <td className={`px-6 py-4 hidden md:table-cell font-medium ${gainLoss >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                            {gainLoss >= 0 ? '+' : ''}{formatCurrency(gainLoss, settings.baseCurrency)}
+                                            {gainLoss >= 0 ? '+' : ''}{formatCurrency(gainLoss, item.currency || settings.baseCurrency)}
                                             <span className="block text-xs opacity-80">{gainLossPercent.toFixed(2)}%</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">

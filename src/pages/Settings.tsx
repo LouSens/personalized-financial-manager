@@ -117,6 +117,61 @@ const Settings: React.FC = () => {
                 </div>
             </section>
 
+            {/* Category Management */}
+            <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Expense Categories</h3>
+                <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                        {settings.categories.map((cat) => (
+                            <div key={cat} className="flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
+                                <span className="text-gray-700 dark:text-gray-300 mr-2">{cat}</span>
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm(`Delete category "${cat}"?`)) {
+                                            updateSettings({ categories: settings.categories.filter((c) => c !== cat) });
+                                        }
+                                    }}
+                                    className="text-gray-400 hover:text-red-500 rounded-full"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <input
+                            type="text"
+                            placeholder="New Category..."
+                            id="new-category-input"
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const input = e.currentTarget;
+                                    const val = input.value.trim();
+                                    if (val && !settings.categories.includes(val)) {
+                                        updateSettings({ categories: [...settings.categories, val] });
+                                        input.value = '';
+                                    }
+                                }
+                            }}
+                        />
+                        <button
+                            onClick={() => {
+                                const input = document.getElementById('new-category-input') as HTMLInputElement;
+                                const val = input.value.trim();
+                                if (val && !settings.categories.includes(val)) {
+                                    updateSettings({ categories: [...settings.categories, val] });
+                                    input.value = '';
+                                }
+                            }}
+                            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             {/* Data Management */}
             <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Data Management</h3>

@@ -35,6 +35,7 @@ export interface Settings {
     baseCurrency: Currency;
     exchangeRates: Record<Currency, number>; // Base is USD
     theme: 'light' | 'dark' | 'system';
+    categories: string[];
 }
 
 export interface AppState {
