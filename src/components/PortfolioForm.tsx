@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useStore } from '../store/useStore';
 import type { PortfolioItem } from '../types';
+import { formatCurrency } from '../utils/currency';
 
 interface PortfolioFormProps {
     onClose: () => void;
@@ -9,13 +10,14 @@ interface PortfolioFormProps {
 }
 
 const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) => {
-    const { addPortfolioItem, updatePortfolioItem } = useStore();
+    const { addPortfolioItem, updatePortfolioItem, settings } = useStore();
     const [formData, setFormData] = useState<Omit<PortfolioItem, 'id'>>({
         symbol: '',
         name: '',
         quantity: 0,
         costBasis: 0,
         currentPrice: 0,
+        currency: settings.baseCurrency,
     });
 
     useEffect(() => {
@@ -26,9 +28,10 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                 quantity: initialData.quantity,
                 costBasis: initialData.costBasis,
                 currentPrice: initialData.currentPrice,
+                currency: initialData.currency || settings.baseCurrency,
             });
         }
-    }, [initialData]);
+    }, [initialData, settings.baseCurrency]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -90,7 +93,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Total Cost
+                        Amount Invested
                     </label>
                     <input
                         type="number"
@@ -99,6 +102,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                         value={formData.costBasis}
                         onChange={(e) => setFormData({ ...formData, costBasis: parseFloat(e.target.value) || 0 })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="Total cash put in"
                     />
                 </div>
                 <div>
@@ -116,14 +120,33 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onClose, initialData }) =
                 </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Currency
+                    </label>
+                    <select
+                        value={formData.currency}
+                        onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                        {Object.keys(settings.exchangeRates).map((currency) => (
+                            <option key={currency} value={currency}>
+                                {currency}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex justify-between mb-1">
                     <span>Avg Cost:</span>
-                    <span>{(formData.costBasis / (formData.quantity || 1)).toFixed(2)} / unit</span>
+                    <span>{formatCurrency((formData.costBasis / (formData.quantity || 1)), formData.currency)} / unit</span>
                 </div>
                 <div className="flex justify-between font-medium">
                     <span>Market Value:</span>
-                    <span>{(formData.quantity * formData.currentPrice).toFixed(2)}</span>
+                    <span>{formatCurrency((formData.quantity * formData.currentPrice), formData.currency)}</span>
                 </div>
             </div>
 

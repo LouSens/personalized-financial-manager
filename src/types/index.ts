@@ -28,6 +28,7 @@ export interface PortfolioItem {
     quantity: number;
     costBasis: number; // Total cost
     currentPrice: number; // Manually updated for now
+    currency: Currency; // Currency of the asset
 }
 
 export interface Settings {

@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AppState, Settings } from '../types';
 
 const DEFAULT_SETTINGS: Settings = {
-    baseCurrency: 'MYR',
+    baseCurrency: 'IDR',
     exchangeRates: {
         USD: 1,
         MYR: 4.7,

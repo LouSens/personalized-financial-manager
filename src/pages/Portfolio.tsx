@@ -38,20 +38,15 @@ const Portfolio: React.FC = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Value</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Invested</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(totalValue, settings.baseCurrency)}
-                        {/* Note: Assuming user inputs price in Base Currency? Or do we need currency per holding? 
-                 Requirement said "personalize current currency exchange value", but portfolio usually is mixed.
-                 For simplicity, let's assume inputs are in base currency or normalized.
-                 Actually, usually stocks are USD. But let's assume raw value for MVP.
-             */}
+                        {formatCurrency(totalCost, settings.baseCurrency)}
                     </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Cost</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Current Value</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(totalCost, settings.baseCurrency)}
+                        {formatCurrency(totalValue, settings.baseCurrency)}
                     </p>
                 </div>
                 <div className={`p-5 rounded-xl shadow-sm border ${totalGainLoss >= 0
