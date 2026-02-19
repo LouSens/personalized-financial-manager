@@ -23,8 +23,12 @@ const Layout: React.FC = () => {
     }, [settings.theme]);
 
     const toggleTheme = () => {
-        const nextTheme = settings.theme === 'light' ? 'dark' : 'light';
-        updateSettings({ theme: nextTheme });
+        if (settings.theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            updateSettings({ theme: isDark ? 'light' : 'dark' });
+        } else {
+            updateSettings({ theme: settings.theme === 'light' ? 'dark' : 'light' });
+        }
     };
 
     const navItems = [
@@ -35,7 +39,11 @@ const Layout: React.FC = () => {
         { to: '/settings', icon: Settings, label: 'Settings' },
     ];
 
-    const ThemeToggleIcon = settings.theme === 'dark' ? Sun : Moon;
+    const isEffectiveDark = settings.theme === 'dark' ||
+        (settings.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const ThemeToggleIcon = isEffectiveDark ? Sun : Moon;
+    const themeLabel = isEffectiveDark ? 'Light Mode' : 'Dark Mode';
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col md:flex-row transition-colors duration-200">
@@ -79,7 +87,7 @@ const Layout: React.FC = () => {
                         className="flex items-center space-x-3 p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                     >
                         <ThemeToggleIcon size={20} />
-                        <span>{settings.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                        <span>{themeLabel}</span>
                     </button>
                 </div>
             </aside>
