@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useStore } from '../store/useStore';
+import { useStore, DEFAULT_SETTINGS } from '../store/useStore';
 import type { Transaction } from '../types';
 
 interface TransactionFormProps {
@@ -167,20 +167,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, initialData,
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Category
                         </label>
-                        <input
-                            list="categories"
-                            type="text"
+                        <select
                             required
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Select or type..."
-                        />
-                        <datalist id="categories">
-                            {settings.categories.map((cat) => (
-                                <option key={cat} value={cat} />
+                        >
+                            {(settings.categories || DEFAULT_SETTINGS.categories).map((cat) => (
+                                <option key={cat} value={cat}>
+                                    {cat}
+                                </option>
                             ))}
-                        </datalist>
+                        </select>
                     </div>
                 </div>
             )}

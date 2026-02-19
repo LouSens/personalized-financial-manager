@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from '../store/useStore';
+import { useStore, DEFAULT_SETTINGS } from '../store/useStore';
 import { exportToExcel } from '../utils/export';
 import { Trash2, Download, Moon, Sun, Monitor, AlertTriangle } from 'lucide-react';
 
@@ -122,13 +122,14 @@ const Settings: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Expense Categories</h3>
                 <div className="space-y-3">
                     <div className="flex flex-wrap gap-2">
-                        {settings.categories.map((cat) => (
+                        {(settings.categories || DEFAULT_SETTINGS.categories).map((cat) => (
                             <div key={cat} className="flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
                                 <span className="text-gray-700 dark:text-gray-300 mr-2">{cat}</span>
                                 <button
                                     onClick={() => {
                                         if (window.confirm(`Delete category "${cat}"?`)) {
-                                            updateSettings({ categories: settings.categories.filter((c) => c !== cat) });
+                                            const currentCategories = settings.categories || DEFAULT_SETTINGS.categories;
+                                            updateSettings({ categories: currentCategories.filter((c) => c !== cat) });
                                         }
                                     }}
                                     className="text-gray-400 hover:text-red-500 rounded-full"
@@ -147,9 +148,10 @@ const Settings: React.FC = () => {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     const input = e.currentTarget;
+                                    const currentCategories = settings.categories || DEFAULT_SETTINGS.categories;
                                     const val = input.value.trim();
-                                    if (val && !settings.categories.includes(val)) {
-                                        updateSettings({ categories: [...settings.categories, val] });
+                                    if (val && !currentCategories.includes(val)) {
+                                        updateSettings({ categories: [...currentCategories, val] });
                                         input.value = '';
                                     }
                                 }
@@ -158,9 +160,10 @@ const Settings: React.FC = () => {
                         <button
                             onClick={() => {
                                 const input = document.getElementById('new-category-input') as HTMLInputElement;
+                                const currentCategories = settings.categories || DEFAULT_SETTINGS.categories;
                                 const val = input.value.trim();
-                                if (val && !settings.categories.includes(val)) {
-                                    updateSettings({ categories: [...settings.categories, val] });
+                                if (val && !currentCategories.includes(val)) {
+                                    updateSettings({ categories: [...currentCategories, val] });
                                     input.value = '';
                                 }
                             }}
