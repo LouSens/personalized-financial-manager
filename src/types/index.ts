@@ -19,6 +19,7 @@ export interface Transaction {
     accountId: string;
     toAccountId?: string; // For transfers
     note?: string;
+    toAmount?: number; // For cross-currency transfers, the amount received in destination currency
 }
 
 export interface PortfolioItem {
