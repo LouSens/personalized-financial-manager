@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS: Settings = {
         'Investment',
         'Other',
     ],
+    accountTypes: ['Bank', 'Mobile Wallet', 'Cash', 'Investment', 'Other'],
 };
 
 export const useStore = create<AppState>()(

@@ -175,6 +175,64 @@ const Settings: React.FC = () => {
                 </div>
             </section>
 
+            {/* Account Types Management */}
+            <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Account Types</h3>
+                <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                        {(settings.accountTypes || DEFAULT_SETTINGS.accountTypes).map((type) => (
+                            <div key={type} className="flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
+                                <span className="text-gray-700 dark:text-gray-300 mr-2">{type}</span>
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm(`Delete account type "${type}"?`)) {
+                                            const currentTypes = settings.accountTypes || DEFAULT_SETTINGS.accountTypes;
+                                            updateSettings({ accountTypes: currentTypes.filter((t) => t !== type) });
+                                        }
+                                    }}
+                                    className="text-gray-400 hover:text-red-500 rounded-full"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <input
+                            type="text"
+                            placeholder="New Account Type..."
+                            id="new-account-type-input"
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const input = e.currentTarget;
+                                    const currentTypes = settings.accountTypes || DEFAULT_SETTINGS.accountTypes;
+                                    const val = input.value.trim();
+                                    if (val && !currentTypes.includes(val)) {
+                                        updateSettings({ accountTypes: [...currentTypes, val] });
+                                        input.value = '';
+                                    }
+                                }
+                            }}
+                        />
+                        <button
+                            onClick={() => {
+                                const input = document.getElementById('new-account-type-input') as HTMLInputElement;
+                                const currentTypes = settings.accountTypes || DEFAULT_SETTINGS.accountTypes;
+                                const val = input.value.trim();
+                                if (val && !currentTypes.includes(val)) {
+                                    updateSettings({ accountTypes: [...currentTypes, val] });
+                                    input.value = '';
+                                }
+                            }}
+                            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             {/* Data Management */}
             <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Data Management</h3>

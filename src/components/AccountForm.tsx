@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useStore } from '../store/useStore';
 import type { Account, Currency } from '../types';
+import { DEFAULT_SETTINGS } from '../store/useStore';
 
 interface AccountFormProps {
     onClose: () => void;
     initialData?: Account;
 }
 
-const ACCOUNT_TYPES = ['Bank', 'Mobile Wallet', 'Cash', 'Investment', 'Other'] as const;
+
 const CURRENCIES: Currency[] = ['USD', 'MYR', 'IDR'];
 const COLORS = [
     '#3B82F6', // Blue
@@ -22,10 +23,11 @@ const COLORS = [
 ];
 
 const AccountForm: React.FC<AccountFormProps> = ({ onClose, initialData }) => {
-    const { addAccount, updateAccount } = useStore();
+    const { addAccount, updateAccount, settings } = useStore();
+    const accountTypes = settings.accountTypes || DEFAULT_SETTINGS.accountTypes;
     const [formData, setFormData] = useState<Omit<Account, 'id' | 'balance'>>({
         name: '',
-        type: 'Bank',
+        type: accountTypes[0] || 'Bank',
         initialBalance: 0,
         currency: 'MYR',
         color: COLORS[0],
@@ -83,7 +85,7 @@ const AccountForm: React.FC<AccountFormProps> = ({ onClose, initialData }) => {
                         onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     >
-                        {ACCOUNT_TYPES.map((type) => (
+                        {accountTypes.map((type) => (
                             <option key={type} value={type}>
                                 {type}
                             </option>

@@ -3,7 +3,7 @@ export type Currency = string; // Was 'USD' | 'MYR' | 'IDR', now dynamic
 export interface Account {
     id: string;
     name: string;
-    type: 'Bank' | 'Mobile Wallet' | 'Cash' | 'Investment' | 'Other';
+    type: string;
     balance: number;
     initialBalance: number;
     currency: Currency;
@@ -37,6 +37,7 @@ export interface Settings {
     exchangeRates: Record<Currency, number>; // Base is USD
     theme: 'light' | 'dark' | 'system';
     categories: string[];
+    accountTypes: string[];
 }
 
 export interface AppState {

@@ -6,7 +6,13 @@ import { formatCurrency, convertCurrency } from '../utils/currency';
 import Modal from '../components/ui/Modal';
 import AccountForm from '../components/AccountForm';
 import Card from '../components/ui/Card';
-import { motion, type Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const ITEM_VARIANTS = {
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0, 0, 0.58, 1] as const } },
+    exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } },
+};
 
 const Accounts: React.FC = () => {
     const accounts = useStore((state) => state.accounts);
@@ -29,9 +35,8 @@ const Accounts: React.FC = () => {
                 amount = -t.amount;
             } else if (t.type === 'Transfer') {
                 if (t.accountId === account.id) {
-                    amount = -t.amount; // Outgoing is always based on source amount
+                    amount = -t.amount;
                 } else if (t.toAccountId === account.id) {
-                    // Incoming: Use toAmount if available (cross-currency), otherwise source amount
                     amount = t.toAmount !== undefined ? t.toAmount : t.amount;
                 }
             }
@@ -62,24 +67,11 @@ const Accounts: React.FC = () => {
         }
     };
 
-    const CONTAINER_VARIANTS: Variants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
-
-    const ITEM_VARIANTS: Variants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
-    };
-
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={CONTAINER_VARIANTS}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             className="space-y-6 max-w-6xl mx-auto pb-20 md:pb-0"
         >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -99,56 +91,69 @@ const Accounts: React.FC = () => {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {accounts.map((account) => {
-                    const currentBalance = getAccountBalance(account);
-                    return (
-                        <motion.div key={account.id} variants={ITEM_VARIANTS}>
-                            <Card className="h-full hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); openEditModal(account); }}
-                                        className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                    >
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(account.id, account.name); }}
-                                        className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-
-                                <div className="flex items-start justify-between mb-6">
-                                    <div
-                                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
-                                        style={{ backgroundColor: account.color, boxShadow: `0 8px 16px -4px ${account.color}60` }}
-                                    >
-                                        <Wallet size={28} />
+                <AnimatePresence mode="popLayout">
+                    {accounts.map((account) => {
+                        const currentBalance = getAccountBalance(account);
+                        return (
+                            <motion.div
+                                key={account.id}
+                                layout
+                                variants={ITEM_VARIANTS}
+                                initial="initial"
+                                animate="animate"
+                                exit="exit"
+                            >
+                                <Card className="h-full hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); openEditModal(account); }}
+                                            className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(account.id, account.name); }}
+                                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">{account.type}</p>
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate mb-1">{account.name}</h3>
-                                    <p className={`text-2xl font-bold tracking-tight ${currentBalance < 0 ? 'text-rose-500' : 'text-slate-900 dark:text-white'}`}>
-                                        {formatCurrency(currentBalance, account.currency)}
-                                    </p>
-                                    {account.currency !== settings.baseCurrency && (
-                                        <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 font-medium">
-                                            ≈ {formatCurrency(convertCurrency(currentBalance, account.currency, settings.baseCurrency, settings.exchangeRates), settings.baseCurrency)}
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div
+                                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                                            style={{ backgroundColor: account.color, boxShadow: `0 8px 16px -4px ${account.color}60` }}
+                                        >
+                                            <Wallet size={28} />
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">{account.type}</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate mb-1">{account.name}</h3>
+                                        <p className={`text-2xl font-bold tracking-tight ${currentBalance < 0 ? 'text-rose-500' : 'text-slate-900 dark:text-white'}`}>
+                                            {formatCurrency(currentBalance, account.currency)}
                                         </p>
-                                    )}
-                                </div>
-                            </Card>
-                        </motion.div>
-                    );
-                })}
+                                        {account.currency !== settings.baseCurrency && (
+                                            <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 font-medium">
+                                                ≈ {formatCurrency(convertCurrency(currentBalance, account.currency, settings.baseCurrency, settings.exchangeRates), settings.baseCurrency)}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
 
                 {accounts.length === 0 && (
-                    <motion.div variants={ITEM_VARIANTS} className="col-span-full">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="col-span-full"
+                    >
                         <div className="py-16 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-900/20">
                             <div className="w-16 h-16 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
                                 <Wallet size={32} className="opacity-50" />
@@ -159,9 +164,11 @@ const Accounts: React.FC = () => {
                     </motion.div>
                 )}
 
-                {/* Add New Account Card (Optional, nice UX) */}
+                {/* Add New Account Card */}
                 <motion.button
-                    variants={ITEM_VARIANTS}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
                     onClick={openAddModal}
                     className="group flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all h-full min-h-[200px]"
                 >
