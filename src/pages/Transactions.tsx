@@ -7,7 +7,7 @@ import { format, parseISO, eachMonthOfInterval, subMonths } from 'date-fns';
 import Modal from '../components/ui/Modal';
 import TransactionForm from '../components/TransactionForm';
 import Card from '../components/ui/Card';
-import { motion, type Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Transactions: React.FC = () => {
     const transactions = useStore((state) => state.transactions);
@@ -65,28 +65,19 @@ const Transactions: React.FC = () => {
         }
     };
 
+    const openAddModal = () => {
+        setEditingTransaction(undefined);
+        setIsModalOpen(true);
+    };
+
     const getAccountName = (id?: string) => accounts.find(a => a.id === id)?.name || 'Unknown';
     const getAccountCurrency = (id: string) => accounts.find(a => a.id === id)?.currency || settings.baseCurrency;
 
-    const CONTAINER_VARIANTS: Variants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.05
-            }
-        }
-    };
-
-    const ITEM_VARIANTS: Variants = {
-        hidden: { opacity: 0, y: 10 },
-        visible: { opacity: 1, y: 0 }
-    };
-
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15 }}
             className="space-y-6 max-w-5xl mx-auto pb-20 md:pb-0"
         >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -119,7 +110,7 @@ const Transactions: React.FC = () => {
                     </div>
                 </div>
                 <button
-                    onClick={() => { setEditingTransaction(undefined); setIsModalOpen(true); }}
+                    onClick={openAddModal}
                     className="flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95 font-medium"
                 >
                     <Plus size={20} className="mr-2" />
@@ -160,63 +151,64 @@ const Transactions: React.FC = () => {
             {/* Transaction List */}
             <Card className="overflow-hidden" noPadding>
                 {filteredTransactions.length > 0 ? (
-                    <motion.div
-                        variants={CONTAINER_VARIANTS}
-                        initial="hidden"
-                        animate="visible"
-                        className="divide-y divide-slate-100 dark:divide-zinc-800"
-                    >
-                        {filteredTransactions.map((t) => (
-                            <motion.div
-                                variants={ITEM_VARIANTS}
-                                key={t.id}
-                                className="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center justify-between group relative"
-                            >
-                                <div className="flex items-center space-x-4 relative z-10">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${t.type === 'Income' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                                        t.type === 'Expense' ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' :
-                                            'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
-                                        }`}>
-                                        {t.type === 'Income' && <ArrowDownLeft size={20} />}
-                                        {t.type === 'Expense' && <ArrowUpRight size={20} />}
-                                        {t.type === 'Transfer' && <RefreshCw size={20} />}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-900 dark:text-white text-base">{t.category || t.type}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-                                                {format(parseISO(t.date), 'dd MMM')}
-                                            </p>
-                                            <span className="text-xs text-slate-400 dark:text-zinc-600">•</span>
-                                            <p className="text-xs text-slate-500 dark:text-zinc-500">
-                                                {getAccountName(t.accountId)}
-                                                {t.type === 'Transfer' && ` → ${getAccountName(t.toAccountId)}`}
-                                            </p>
+                    <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+                        <AnimatePresence mode="popLayout">
+                            {filteredTransactions.map((t) => (
+                                <motion.div
+                                    key={t.id}
+                                    layout
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center justify-between group relative"
+                                >
+                                    <div className="flex items-center space-x-4 relative z-10">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${t.type === 'Income' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                                            t.type === 'Expense' ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' :
+                                                'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+                                            }`}>
+                                            {t.type === 'Income' && <ArrowDownLeft size={20} />}
+                                            {t.type === 'Expense' && <ArrowUpRight size={20} />}
+                                            {t.type === 'Transfer' && <RefreshCw size={20} />}
                                         </div>
-                                        {t.note && <p className="text-xs text-slate-400 dark:text-zinc-500 italic mt-1">{t.note}</p>}
+                                        <div>
+                                            <h4 className="font-semibold text-slate-900 dark:text-white text-base">{t.category || t.type}</h4>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                                                    {format(parseISO(t.date), 'dd MMM')}
+                                                </p>
+                                                <span className="text-xs text-slate-400 dark:text-zinc-600">•</span>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-500">
+                                                    {getAccountName(t.accountId)}
+                                                    {t.type === 'Transfer' && ` → ${getAccountName(t.toAccountId)}`}
+                                                </p>
+                                            </div>
+                                            {t.note && <p className="text-xs text-slate-400 dark:text-zinc-500 italic mt-1">{t.note}</p>}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center gap-6 relative z-10">
-                                    <span className={`font-bold text-lg tabular-nums tracking-tight ${t.type === 'Income' ? 'text-emerald-600 dark:text-emerald-400' :
-                                        t.type === 'Expense' ? 'text-rose-600 dark:text-rose-400' :
-                                            'text-slate-900 dark:text-white'
-                                        }`}>
-                                        {t.type === 'Expense' ? '-' : '+'}{formatCurrency(t.amount, getAccountCurrency(t.accountId))}
-                                    </span>
+                                    <div className="flex items-center gap-6 relative z-10">
+                                        <span className={`font-bold text-lg tabular-nums tracking-tight ${t.type === 'Income' ? 'text-emerald-600 dark:text-emerald-400' :
+                                            t.type === 'Expense' ? 'text-rose-600 dark:text-rose-400' :
+                                                'text-slate-900 dark:text-white'
+                                            }`}>
+                                            {t.type === 'Expense' ? '-' : '+'}{formatCurrency(t.amount, getAccountCurrency(t.accountId))}
+                                        </span>
 
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                        <button onClick={() => { setEditingTransaction(t); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(t.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                            <button onClick={() => { setEditingTransaction(t); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button onClick={() => handleDelete(t.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
                 ) : (
                     <div className="p-12 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center">
                         <div className="w-16 h-16 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">

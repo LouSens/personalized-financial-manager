@@ -9,9 +9,9 @@ import Card from '../components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ITEM_VARIANTS = {
-    initial: { opacity: 0, y: 20, scale: 0.95 },
-    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0, 0, 0.58, 1] as const } },
-    exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } },
+    initial: { opacity: 0, y: 10, scale: 0.97 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.15 } },
+    exit: { opacity: 0, scale: 0.97, transition: { duration: 0.1 } },
 };
 
 const Accounts: React.FC = () => {
@@ -71,7 +71,7 @@ const Accounts: React.FC = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.15 }}
             className="space-y-6 max-w-6xl mx-auto pb-20 md:pb-0"
         >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -168,7 +168,7 @@ const Accounts: React.FC = () => {
                 <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ delay: 0.05 }}
                     onClick={openAddModal}
                     className="group flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all h-full min-h-[200px]"
                 >

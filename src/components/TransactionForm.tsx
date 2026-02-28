@@ -140,7 +140,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, initialData,
                         step="0.01"
                         required
                         value={formData.amount}
-                        onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+                        onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                         className="w-full pl-12 pr-4 py-2 bg-slate-50 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                     />
                 </div>
@@ -160,7 +160,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, initialData,
                             step="0.01"
                             required
                             value={formData.toAmount || ''}
-                            onChange={(e) => setFormData({ ...formData, toAmount: parseFloat(e.target.value) })}
+                            onChange={(e) => setFormData({ ...formData, toAmount: parseFloat(e.target.value) || 0 })}
                             className="w-full pl-12 pr-4 py-2 bg-slate-50 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                         />
                     </div>

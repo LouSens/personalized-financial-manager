@@ -30,9 +30,6 @@ const Card: React.FC<CardProps> = ({
 
             {/* Main Card Content */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
                 className={cn(
                     "relative h-full w-full rounded-2xl overflow-hidden transition-all duration-300",
                     // Light Mode
